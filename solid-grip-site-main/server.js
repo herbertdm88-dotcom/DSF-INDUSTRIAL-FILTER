@@ -1,19 +1,24 @@
 import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 
-app.use(express.static(path.join(__dirname, 'dist')));
+// Tenta servir de várias formas
+app.use(express.static('dist'));
+app.use(express.static('./dist'));
+app.use(express.static('/app/dist'));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  // Tenta todos os caminhos possíveis
+  try {
+    res.sendFile('index.html', { root: 'dist' });
+  } catch (err) {
+    try {
+      res.sendFile('/app/dist/index.html');
+    } catch (err2) {
+      res.sendFile('./dist/index.html');
+    }
+  }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Servidor Express rodando na porta ${PORT}`);
+app.listen(3000, '0.0.0.0', () => {
+  console.log('✅ Servidor rodando - procurando index.html...');
 });
